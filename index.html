@@ -1,0 +1,90 @@
+<html>
+
+<head>
+
+    <style>
+        body {
+            margin: 10px;
+            background-color: black;
+            color: white;
+            font-family: "Courier New";
+        }
+
+        video {
+            height: 900px;
+            display: inline-block;
+        }
+    </style>
+
+</head>
+
+<body>
+    <h1>Move matcher</h1>
+    <video id="student" src="student.mp4" controls></video>
+    <video id="teacher" src="teacher.mp4"></video>
+    <br>
+    <label>Time offset</label>
+    <input type="number" id="offset" value="-14.58">
+</body>
+
+
+<script>
+
+    const offset = document.getElementById("offset")
+
+    const teacher = document.getElementById("teacher")
+
+    const student = document.getElementById("student")
+
+    function calculate_teacher_time() {
+        return student.currentTime + parseFloat(offset.value)
+    }
+
+    function sync_videos() {
+        teacher.currentTime = calculate_teacher_time()
+    }
+
+    function are_videos_in_range() {
+        return calculate_teacher_time() > 0
+    }
+
+    student.addEventListener('play', (event) => {
+        if (are_videos_in_range())
+            teacher.play()
+    })
+
+    student.addEventListener('pause', (event) => {
+        teacher.pause()
+    })
+
+    student.addEventListener('seeked', (event) => {
+        sync_videos()
+    })
+
+    offset.addEventListener('input', (event) => {
+        sync_videos()
+    })
+
+
+    // only start playing the teacher video when it 
+    // begins to overlap with the student video
+    var last_time = 0
+
+    setInterval(() => {
+
+        const curr_time = calculate_teacher_time()
+
+        // catch the boundary of when the videos begin to overlap and begin 
+        // playing if the student video is playing aswell
+        if ((curr_time >= 0) && (last_time < 0) && (student.paused == false)) {
+            teacher.play()
+        }
+        last_time = curr_time
+
+    }, 1000 / 30)
+
+
+
+</script>
+
+</html>
